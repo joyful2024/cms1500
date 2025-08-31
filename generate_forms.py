@@ -223,6 +223,26 @@ def generate_random_address():
         "99"   # Other Place of Service
     ]
     
+    # Type of service codes for medical billing
+    type_of_service_codes = [
+        "1",   # Medical care
+        "2",   # Surgery
+        "3",   # Consultation
+        "4",   # Diagnostic X-ray
+        "5",   # Diagnostic laboratory
+        "6",   # Radiation therapy
+        "7",   # Anesthesia
+        "8",   # Assistant at surgery
+        "9",   # Other medical items or services
+        "0",   # Whole blood only
+        "A",   # Used DME
+        "E",   # Ambulance
+        "F",   # Oxygen and other gases
+        "P",   # Lenses, prisms, etc.
+        "V",   # Pneumococcal/influenza virus vaccine
+        "S",   # Surgical dressings
+    ]
+    
     # Create service line data
     service_line_data = {}
     service_dates = {}
@@ -235,12 +255,20 @@ def generate_random_address():
         service_line_data[f"cpt{i}"] = code
         service_line_data[f"cpt{i}_description"] = description
         
-        # Modifiers (20% chance of having a modifier)
+        # Primary modifier (20% chance of having a modifier)
         if fake.random_int(1, 100) <= 20:
             modifier = fake.random_element([m for m in common_modifiers if m != ""])
             service_line_data[f"mod{i}"] = modifier
         else:
             service_line_data[f"mod{i}"] = ""
+        
+        # Additional modifier positions (10% chance each for mod1a, mod1b, mod1c)
+        for mod_pos in ['a', 'b', 'c']:
+            if fake.random_int(1, 100) <= 10:  # 10% chance for additional modifiers
+                additional_modifier = fake.random_element([m for m in common_modifiers if m != ""])
+                service_line_data[f"mod{i}{mod_pos}"] = additional_modifier
+            else:
+                service_line_data[f"mod{i}{mod_pos}"] = ""
         
         # Service dates (within last 30 days)
         service_date = fake.date_between(start_date='-30d', end_date='today')
@@ -257,8 +285,33 @@ def generate_random_address():
         place_code = fake.random_element(place_of_service_codes)
         service_line_data[f"place{i}"] = place_code
         
-        # Emergency indicator (5% chance)
-        if fake.random_int(1, 100) <= 5:
+        # Type of service - match to procedure type
+        if code.startswith('99'):  # E&M codes
+            type_code = "1"  # Medical care
+        elif code.startswith(('10', '11', '12', '20', '21')):  # Surgery codes  
+            type_code = "2"  # Surgery
+        elif code.startswith(('70', '71', '72', '73', '74', '75', '76', '77')):  # Radiology
+            type_code = "4"  # Diagnostic X-ray
+        elif code.startswith(('80', '81', '82', '83', '84', '85', '86', '87', '88', '89')):  # Lab
+            type_code = "5"  # Diagnostic laboratory
+        elif code.startswith('36415'):  # Venipuncture
+            type_code = "5"  # Diagnostic laboratory
+        elif code.startswith('90471'):  # Immunization
+            type_code = "V"  # Vaccine
+        elif code.startswith('93000'):  # ECG
+            type_code = "4"  # Diagnostic
+        elif code.startswith('94010'):  # Spirometry
+            type_code = "4"  # Diagnostic
+        else:
+            type_code = fake.random_element(type_of_service_codes[:3])  # Default to medical/surgery/consultation
+        
+        service_line_data[f"type{i}"] = type_code
+        
+        # Emergency indicator (8% chance - increased from 5% for better ML training)
+        emergency_procedures = ['99281', '99282', '99283', '99284', '99285']  # ER visit codes
+        if any(code.startswith(emergency) for emergency in emergency_procedures):
+            service_line_data[f"emg{i}"] = "Y"  # Emergency procedures always marked
+        elif fake.random_int(1, 100) <= 8:
             service_line_data[f"emg{i}"] = "Y"
         else:
             service_line_data[f"emg{i}"] = ""
@@ -271,11 +324,21 @@ def generate_random_address():
         # Units (1-5)  
         units = fake.random_int(1, 5)
         service_units[f"units{i}"] = str(units)
+        
+        # Days (for services that span multiple days - 15% chance)
+        if fake.random_int(1, 100) <= 15:
+            days = fake.random_int(1, 30)  # 1-30 days
+            service_line_data[f"day{i}"] = str(days)
+        else:
+            service_line_data[f"day{i}"] = ""
     
     # Fill remaining service lines with empty values
     for i in range(num_service_lines + 1, 7):
         service_line_data[f"cpt{i}"] = ""
         service_line_data[f"mod{i}"] = ""
+        service_line_data[f"mod{i}a"] = ""
+        service_line_data[f"mod{i}b"] = ""
+        service_line_data[f"mod{i}c"] = ""
         service_dates[f"sv{i}_mm_from"] = ""
         service_dates[f"sv{i}_dd_from"] = ""
         service_dates[f"sv{i}_yy_from"] = ""
@@ -283,13 +346,137 @@ def generate_random_address():
         service_dates[f"sv{i}_dd_end"] = ""
         service_dates[f"sv{i}_yy_end"] = ""
         service_line_data[f"place{i}"] = ""
+        service_line_data[f"type{i}"] = ""
         service_line_data[f"emg{i}"] = ""
+        service_line_data[f"day{i}"] = ""
         service_charges[f"ch{i}"] = ""
         service_units[f"units{i}"] = ""
     
     # Generate financial totals
     amount_paid = fake.random_int(0, int(total_charges * 0.8))  # 0-80% of total charges paid
     balance_due = total_charges - amount_paid
+    
+    # Generate treatment timeline dates (Box 14, 15, 16)
+    # Current illness onset date (Box 14) - 30-365 days ago
+    if fake.random_int(1, 100) <= 60:  # 60% chance of having illness onset date
+        illness_onset_date = fake.date_between(start_date='-365d', end_date='-30d')
+        cur_ill_mm = f"{illness_onset_date.month:02d}"
+        cur_ill_dd = f"{illness_onset_date.day:02d}"
+        cur_ill_yy = f"{illness_onset_date.year % 100:02d}"
+    else:
+        cur_ill_mm = cur_ill_dd = cur_ill_yy = ""
+    
+    # Similar illness date (Box 15) - only if different from current illness
+    if fake.random_int(1, 100) <= 20:  # 20% chance of having similar illness date
+        similar_illness_date = fake.date_between(start_date='-2y', end_date='-6m')
+        sim_ill_mm = f"{similar_illness_date.month:02d}"
+        sim_ill_dd = f"{similar_illness_date.day:02d}"
+        sim_ill_yy = f"{similar_illness_date.year % 100:02d}"
+    else:
+        sim_ill_mm = sim_ill_dd = sim_ill_yy = ""
+    
+    # Unable to work dates (Box 16) - only for work-related conditions
+    if fake.random_int(1, 100) <= 25:  # 25% chance of work disability
+        work_start_date = fake.date_between(start_date='-90d', end_date='-7d')
+        work_end_date = fake.date_between(start_date=work_start_date, end_date='today')
+        work_mm_from = f"{work_start_date.month:02d}"
+        work_dd_from = f"{work_start_date.day:02d}"
+        work_yy_from = f"{work_start_date.year % 100:02d}"
+        work_mm_end = f"{work_end_date.month:02d}"
+        work_dd_end = f"{work_end_date.day:02d}"
+        work_yy_end = f"{work_end_date.year % 100:02d}"
+    else:
+        work_mm_from = work_dd_from = work_yy_from = ""
+        work_mm_end = work_dd_end = work_yy_end = ""
+    
+    # Hospitalization dates (Box 18) - for serious conditions
+    if fake.random_int(1, 100) <= 15:  # 15% chance of hospitalization
+        hosp_admit_date = fake.date_between(start_date='-30d', end_date='-3d')
+        hosp_discharge_date = fake.date_between(start_date=hosp_admit_date, end_date='today')
+        hosp_mm_from = f"{hosp_admit_date.month:02d}"
+        hosp_dd_from = f"{hosp_admit_date.day:02d}"
+        hosp_yy_from = f"{hosp_admit_date.year % 100:02d}"
+        hosp_mm_end = f"{hosp_discharge_date.month:02d}"
+        hosp_dd_end = f"{hosp_discharge_date.day:02d}"
+        hosp_yy_end = f"{hosp_discharge_date.year % 100:02d}"
+    else:
+        hosp_mm_from = hosp_dd_from = hosp_yy_from = ""
+        hosp_mm_end = hosp_dd_end = hosp_yy_end = ""
+    
+    # Accident place (Box 10b, 10c) - state where accident occurred
+    if auto_accident_related == "YES" or other_accident_related == "YES":
+        # Use realistic US state abbreviations
+        us_states = [
+            "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+            "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+            "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+            "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+            "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+        ]
+        accident_place = fake.random_element(us_states)
+    else:
+        accident_place = ""
+    
+    # Secondary insurance (Box 9) - 30% chance of having secondary coverage
+    if fake.random_int(1, 100) <= 30:
+        other_ins_name = fake.name()
+        other_ins_policy = fake.bothify(text="??########")
+        other_ins_plan_name = fake.random_element([
+            "Blue Cross Blue Shield", "Aetna", "Cigna", "UnitedHealth",
+            "Humana", "Anthem", "Kaiser Permanente"
+        ])
+    else:
+        other_ins_name = other_ins_policy = other_ins_plan_name = ""
+    
+    # Authorization and reference numbers (Box 19, 23)
+    if fake.random_int(1, 100) <= 25:  # 25% chance of prior authorization
+        prior_auth = fake.bothify(text="PA########")
+    else:
+        prior_auth = ""
+    
+    if fake.random_int(1, 100) <= 15:  # 15% chance of original reference
+        original_ref = fake.bothify(text="REF#######")
+    else:
+        original_ref = ""
+    
+    if fake.random_int(1, 100) <= 10:  # 10% chance of Medicaid resubmission
+        medicaid_resub = fake.bothify(text="###")
+    else:
+        medicaid_resub = ""
+    
+    # Referring physician (Box 17)
+    if fake.random_int(1, 100) <= 40:  # 40% chance of referral
+        ref_physician = f"Dr. {fake.first_name()} {fake.last_name()}, MD"
+        ref_physician_npi = fake.bothify(text="##########")
+        ref_physician_qualifier = "1B"  # NPI qualifier
+    else:
+        ref_physician = ""
+        ref_physician_npi = ""
+        ref_physician_qualifier = ""
+    
+    # Signature fields
+    pt_signature = "Patient Signature on File" if fake.random_int(1, 100) <= 85 else ""
+    pt_signature_date = fake.date_between(start_date='-30d', end_date='today').strftime('%m/%d/%y') if pt_signature else ""
+    
+    physician_signature = f"{provider_name}"
+    physician_signature_date = fake.date_between(start_date='-7d', end_date='today').strftime('%m/%d/%y')
+    
+    # Service facility (Box 32) - for services not performed at billing location
+    if fake.random_int(1, 100) <= 35:  # 35% chance of different service facility
+        facility_names = [
+            "City General Hospital",
+            "Regional Medical Center", 
+            "Outpatient Surgery Center",
+            "Diagnostic Imaging Center",
+            "Physical Therapy Clinic",
+            "Urgent Care Center",
+            "Community Health Center"
+        ]
+        fac_name = fake.random_element(facility_names)
+        fac_street = fake.address().replace('\n', ', ')
+        fac_location = f"{fake.city()}, {fake.state_abbr()} {fake.zipcode()}"
+    else:
+        fac_name = fac_street = fac_location = ""
     
     # Generate random ICD-10-CM diagnosis codes (Field 21)
     # Common ICD-10-CM codes for realistic healthcare scenarios
@@ -412,6 +599,57 @@ def generate_random_address():
         "amt_paid": f"{amount_paid}.00",
         "charge": f"{balance_due}.00",
         
+        # Treatment timeline
+        "cur_ill_mm": cur_ill_mm,
+        "cur_ill_dd": cur_ill_dd,
+        "cur_ill_yy": cur_ill_yy,
+        "sim_ill_mm": sim_ill_mm,
+        "sim_ill_dd": sim_ill_dd,
+        "sim_ill_yy": sim_ill_yy,
+        "work_mm_from": work_mm_from,
+        "work_dd_from": work_dd_from,
+        "work_yy_from": work_yy_from,
+        "work_mm_end": work_mm_end,
+        "work_dd_end": work_dd_end,
+        "work_yy_end": work_yy_end,
+        
+        # Hospitalization dates
+        "hosp_mm_from": hosp_mm_from,
+        "hosp_dd_from": hosp_dd_from,
+        "hosp_yy_from": hosp_yy_from,
+        "hosp_mm_end": hosp_mm_end,
+        "hosp_dd_end": hosp_dd_end,
+        "hosp_yy_end": hosp_yy_end,
+        
+        # Accident details
+        "accident_place": accident_place,
+        
+        # Secondary insurance
+        "other_ins_name": other_ins_name,
+        "other_ins_policy": other_ins_policy,
+        "other_ins_plan_name": other_ins_plan_name,
+        
+        # Authorization and reference
+        "prior_auth": prior_auth,
+        "original_ref": original_ref,
+        "medicaid_resub": medicaid_resub,
+        
+        # Referring physician
+        "ref_physician": ref_physician,
+        "physician number 17a": ref_physician_npi,
+        "physician number 17a1": ref_physician_qualifier,
+        
+        # Signatures
+        "pt_signature": pt_signature,
+        "pt_date": pt_signature_date,
+        "physician_signature": physician_signature,
+        "physician_date": physician_signature_date,
+        
+        # Service facility
+        "fac_name": fac_name,
+        "fac_street": fac_street,
+        "fac_location": fac_location,
+        
         **diagnosis_data,
         **service_line_diagnoses,
         **service_line_data,
@@ -447,7 +685,7 @@ def fill_cms1500_form(address_data, output_filename):
                           'employment', 'pt_auto_accident', 'other_accident', 'ins_sex', 
                           'ins_benefit_plan', 'lab', 'ssn', 'assignment']
         
-        # Skip metadata fields (descriptions and counts)
+        # Skip metadata fields (descriptions and counts)  
         metadata_fields = ['num_diagnoses', 'num_service_lines'] + [f'diagnosis{i}_description' for i in range(1, 13)] + [f'cpt{i}_description' for i in range(1, 7)]
         skip_fields = checkbox_fields + metadata_fields
         

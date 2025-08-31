@@ -93,14 +93,27 @@ def test_generate_random_address():
         cpt_field = f"cpt{i}"
         desc_field = f"cpt{i}_description"
         mod_field = f"mod{i}"
-        charge_field = f"charge{i}"
+        charge_field = f"ch{i}"  # Updated field name
         units_field = f"units{i}"
+        place_field = f"place{i}"
+        type_field = f"type{i}"
+        emg_field = f"emg{i}"
+        day_field = f"day{i}"
         
         assert cpt_field in address, f"Missing CPT field: {cpt_field}"
         assert desc_field in address, f"Missing CPT description field: {desc_field}"
         assert mod_field in address, f"Missing modifier field: {mod_field}"
         assert charge_field in address, f"Missing charge field: {charge_field}"
         assert units_field in address, f"Missing units field: {units_field}"
+        assert place_field in address, f"Missing place of service field: {place_field}"
+        assert type_field in address, f"Missing type of service field: {type_field}"
+        assert emg_field in address, f"Missing emergency field: {emg_field}"
+        assert day_field in address, f"Missing days field: {day_field}"
+        
+        # Check additional modifier positions
+        for mod_pos in ['a', 'b', 'c']:
+            mod_ext_field = f"mod{i}{mod_pos}"
+            assert mod_ext_field in address, f"Missing extended modifier field: {mod_ext_field}"
         
         assert isinstance(address[cpt_field], str), f"CPT code should be string: {cpt_field}"
         assert len(address[cpt_field]) == 5, f"CPT code should be 5 characters: {address[cpt_field]}"
@@ -109,6 +122,22 @@ def test_generate_random_address():
         # Modifier can be empty or 2 characters
         if address[mod_field]:
             assert len(address[mod_field]) <= 2, f"Modifier too long: {address[mod_field]}"
+        
+        # Place of service should be 2-digit string
+        assert isinstance(address[place_field], str), f"Place of service should be string: {place_field}"
+        assert len(address[place_field]) == 2, f"Place of service should be 2 digits: {address[place_field]}"
+        assert address[place_field].isdigit(), f"Place of service should be numeric: {address[place_field]}"
+        
+        # Type of service should be valid code
+        assert isinstance(address[type_field], str), f"Type of service should be string: {type_field}"
+        assert address[type_field] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "V", "A"], f"Invalid type of service: {address[type_field]}"
+        
+        # Emergency field should be empty or Y
+        assert address[emg_field] in ["", "Y"], f"Invalid emergency indicator: {address[emg_field]}"
+        
+        # Days field should be empty or numeric
+        if address[day_field]:
+            assert address[day_field].isdigit(), f"Days should be numeric: {address[day_field]}"
         
         # Charges should be in format "XXX.00"
         assert "." in address[charge_field], f"Charge should have decimal: {address[charge_field]}"
@@ -121,13 +150,14 @@ def test_generate_random_address():
         assert address[units_field].isdigit(), f"Units should be numeric: {address[units_field]}"
         assert 1 <= int(address[units_field]) <= 5, f"Units should be 1-5: {address[units_field]}"
         
-        # Service dates
-        for date_part in ["mm", "dd", "yy"]:
-            date_field = f"service_date{i}_{date_part}"
-            assert date_field in address, f"Missing service date field: {date_field}"
-            if address[date_field]:  # If not empty
-                assert len(address[date_field]) == 2, f"Service date part should be 2 digits: {address[date_field]}"
-                assert address[date_field].isdigit(), f"Service date part should be numeric: {address[date_field]}"
+        # Service dates (from and end dates)
+        for date_type in ["from", "end"]:
+            for date_part in ["mm", "dd", "yy"]:
+                date_field = f"sv{i}_{date_part}_{date_type}"
+                assert date_field in address, f"Missing service date field: {date_field}"
+                if address[date_field]:  # If not empty
+                    assert len(address[date_field]) == 2, f"Service date part should be 2 digits: {address[date_field]}"
+                    assert address[date_field].isdigit(), f"Service date part should be numeric: {address[date_field]}"
     
     # Check that remaining service lines are empty
     for i in range(address["num_service_lines"] + 1, 7):
