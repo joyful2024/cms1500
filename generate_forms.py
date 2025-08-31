@@ -478,6 +478,113 @@ def generate_random_address():
     else:
         fac_name = fac_street = fac_location = ""
     
+    # PHASE 2: Insurance & Provider Detail Fields
+    
+    # Insured's address (Box 7) - 85% chance of having insured address
+    if fake.random_int(1, 100) <= 85:
+        ins_street = fake.street_address()
+        ins_city = fake.city()
+        ins_state = fake.state_abbr()
+        ins_zip = fake.zipcode()
+        ins_phone_area = str(fake.random_int(100, 999))
+        ins_phone = fake.bothify(text="###-####")
+    else:
+        ins_street = ins_city = ins_state = ins_zip = ""
+        ins_phone_area = ins_phone = ""
+    
+    # Additional insurance identifiers (Box 11d, various insurance fields)
+    insurance_id = fake.bothify(text="##########") if fake.random_int(1, 100) <= 70 else ""
+    insurance_address2 = f"Suite {fake.random_int(100, 999)}" if fake.random_int(1, 100) <= 30 else ""
+    insurance_city_state_zip = f"{fake.city()}, {fake.state_abbr()} {fake.zipcode()}" if fake.random_int(1, 100) <= 60 else ""
+    
+    # Provider identification numbers (Box 25, 33)
+    # PIN (Provider Identification Number) - legacy identifier
+    pin = fake.bothify(text="##########") if fake.random_int(1, 100) <= 40 else ""
+    pin1 = fake.bothify(text="##########") if fake.random_int(1, 100) <= 35 else ""
+    
+    # Group practice identifiers
+    grp = fake.bothify(text="GRP######") if fake.random_int(1, 100) <= 50 else ""
+    grp1 = fake.bothify(text="######") if fake.random_int(1, 100) <= 45 else ""
+    
+    # Provider location identifier
+    doc_location = f"{fake.city()}, {fake.state_abbr()}" if fake.random_int(1, 100) <= 55 else ""
+    
+    # Supplemental claim information (various boxes)
+    suppl_fields = {}
+    for suffix in ["", "a", "b", "c", "d", "e"]:
+        field_name = f"Suppl{suffix}" if suffix else "Suppl"
+        if fake.random_int(1, 100) <= 15:  # 15% chance for supplemental info
+            suppl_fields[field_name] = fake.bothify(text="SUP###")
+        else:
+            suppl_fields[field_name] = ""
+    
+    # NUCC (National Uniform Claim Committee) usage field
+    nucc_use = fake.bothify(text="NUCC###") if fake.random_int(1, 100) <= 20 else ""
+    
+    # Local use codes (Box 24K - local use area)
+    local_use_fields = {}
+    for i in range(1, 7):  # local1 through local6
+        for suffix in ["", "a"]:  # local1, local1a, etc.
+            field_name = f"local{i}{suffix}"
+            if fake.random_int(1, 100) <= 25:  # 25% chance of local use codes
+                local_codes = ["LOC", "MED", "REG", "SPEC", "PROV", "FAC"]
+                local_use_fields[field_name] = fake.random_element(local_codes) + fake.bothify(text="###")
+            else:
+                local_use_fields[field_name] = ""
+    
+    # EPSDT (Early and Periodic Screening, Diagnostic and Treatment) fields
+    epsdt_fields = {}
+    for i in range(1, 7):  # epsdt1 through epsdt6
+        field_name = f"epsdt{i}"
+        if fake.random_int(1, 100) <= 20:  # 20% chance - EPSDT is for pediatric Medicaid
+            epsdt_values = ["Y", "N", "P"]  # Yes, No, Pending
+            epsdt_fields[field_name] = fake.random_element(epsdt_values)
+        else:
+            epsdt_fields[field_name] = ""
+    
+    # Plan codes (treatment/service plan codes)
+    plan_fields = {}
+    for i in range(1, 7):  # plan1 through plan6
+        field_name = f"plan{i}"
+        if fake.random_int(1, 100) <= 30:  # 30% chance of plan codes
+            plan_types = ["PREV", "THER", "DIAG", "SURG", "EMRG", "ROUT"]
+            plan_fields[field_name] = fake.random_element(plan_types) + fake.bothify(text="##")
+        else:
+            plan_fields[field_name] = ""
+    
+    # PHASE 3: Enhanced Clinical Timeline & Insurance Fields
+    
+    # Insurance plan details (Box 11c)
+    ins_plan_name = ""
+    ins_signature = ""
+    if fake.random_int(1, 100) <= 75:  # 75% chance of having plan name
+        plan_names = [
+            "HMO Basic", "PPO Premium", "EPO Standard", "POS Select",
+            "Medicare Supplement Plan F", "Medicare Advantage", "Medigap Plan G",
+            "Employee Health Plan", "Family Coverage", "Individual Plan",
+            "High Deductible Health Plan", "Bronze Plan", "Silver Plan", "Gold Plan"
+        ]
+        ins_plan_name = fake.random_element(plan_names)
+    
+    # Insured signature field (Box 12) - 70% chance of signature on file
+    if fake.random_int(1, 100) <= 70:
+        ins_signature = "Signature on File"
+    
+    # Enhanced laboratory services logic based on CPT codes
+    # Override the basic lab field with intelligent detection
+    lab_related_cpts = ['80053', '80061', '85025', '85027', '36415', '81002', '82962']
+    has_lab_services = False
+    for i in range(1, num_service_lines + 1):
+        cpt_code = service_line_data.get(f"cpt{i}", "")
+        if any(cpt_code.startswith(lab_code) for lab_code in lab_related_cpts):
+            has_lab_services = True
+            break
+    
+    # Set lab field based on actual services (overrides random assignment from earlier)
+    if has_lab_services:
+        lab = "YES"  # Override previous random assignment
+    # Keep existing random assignment if no lab CPT codes detected
+    
     # Generate random ICD-10-CM diagnosis codes (Field 21)
     # Common ICD-10-CM codes for realistic healthcare scenarios
     common_icd10_codes = [
@@ -526,15 +633,45 @@ def generate_random_address():
         ("Z51.11", "Encounter for antineoplastic chemotherapy")
     ]
     
-    # Select 1-4 random diagnosis codes (most claims have 1-3 diagnoses)
-    num_diagnoses = fake.random_int(1, 4)
+    # PHASE 3: Extended diagnosis support (1-12 diagnoses for complex cases)
+    # Most claims have 1-4 diagnoses, but complex cases can have up to 12
+    diagnosis_probabilities = [
+        (1, 25),  # 1 diagnosis: 25%
+        (2, 30),  # 2 diagnoses: 30% 
+        (3, 20),  # 3 diagnoses: 20%
+        (4, 15),  # 4 diagnoses: 15%
+        (5, 5),   # 5 diagnoses: 5%
+        (6, 3),   # 6 diagnoses: 3%
+        (7, 1),   # 7+ diagnoses: 2% total (complex cases)
+        (8, 0.5),
+        (9, 0.3),
+        (10, 0.1),
+        (11, 0.05),
+        (12, 0.05)
+    ]
+    
+    # Weighted random selection
+    random_val = fake.random_int(1, 10000) / 100  # 0.01 to 100.00
+    cumulative = 0
+    num_diagnoses = 1  # default
+    for count, probability in diagnosis_probabilities:
+        cumulative += probability
+        if random_val <= cumulative:
+            num_diagnoses = count
+            break
+    
     selected_diagnoses = fake.random_elements(common_icd10_codes, length=num_diagnoses, unique=True)
     
-    # Create diagnosis code data
+    # Create extended diagnosis code data (supporting up to 12 diagnoses)
     diagnosis_data = {}
-    for i, (code, description) in enumerate(selected_diagnoses, 1):
-        diagnosis_data[f"diagnosis{i}"] = code
-        diagnosis_data[f"diagnosis{i}_description"] = description
+    for i in range(1, 13):  # diagnosis1 through diagnosis12
+        if i <= num_diagnoses:
+            code, description = selected_diagnoses[i-1]
+            diagnosis_data[f"diagnosis{i}"] = code
+            diagnosis_data[f"diagnosis{i}_description"] = description
+        else:
+            diagnosis_data[f"diagnosis{i}"] = ""
+            diagnosis_data[f"diagnosis{i}_description"] = ""
     
     # For service lines, randomly reference the diagnosis codes
     # diag1-diag6 should contain pointers (A, B, C, D) to the diagnosis codes
@@ -650,12 +787,37 @@ def generate_random_address():
         "fac_street": fac_street,
         "fac_location": fac_location,
         
+        # PHASE 2: Insurance & Provider Details
+        "ins_street": ins_street,
+        "ins_city": ins_city,
+        "ins_state": ins_state,
+        "ins_zip": ins_zip,
+        "ins_phone": ins_phone,
+        "ins_phone area": ins_phone_area,
+        "insurance_id": insurance_id,
+        "insurance_address2": insurance_address2,
+        "insurance_city_state_zip": insurance_city_state_zip,
+        "pin": pin,
+        "pin1": pin1,
+        "grp": grp,
+        "grp1": grp1,
+        "doc_location": doc_location,
+        "NUCC USE": nucc_use,
+        
+        # PHASE 3: Enhanced Clinical Fields
+        "ins_plan_name": ins_plan_name,
+        "ins_signature": ins_signature,
+        
         **diagnosis_data,
         **service_line_diagnoses,
         **service_line_data,
         **service_dates,
         **service_charges,
-        **service_units
+        **service_units,
+        **suppl_fields,
+        **local_use_fields,
+        **epsdt_fields,
+        **plan_fields
     }
 
 def fill_cms1500_form(address_data, output_filename):
