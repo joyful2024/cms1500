@@ -1,0 +1,36 @@
+{
+  "form_number": 4,
+  "pdf_filename": "cms1500_form_0004.pdf",
+  "png_filename": "cms1500_form_0004.png",
+  "generated_date": "2023-06-08T12:45:50.529304",
+  "core_data": {
+    "box_1_insurance_type": "Medicaid",
+    "box_1a_insured_id": "0456683043",
+    "box_2_patient_name": "Brandy Wright Md",
+    "box_3_patient_dob": "11/21/62",
+    "box_3_patient_sex": "M",
+    "box_4_insured_name": "Brandy Wright Md",
+    "box_5_patient_address": "074 Gerald Crossing, East Timothyshire, MS 67214",
+    "box_5_patient_phone": "(297) 206-6677",
+    "box_6_relationship": "M",
+    "box_21_primary_diagnosis": "R50.9",
+    "box_21_secondary_diagnosis": "",
+    "box_21_tertiary_diagnosis": "",
+    "box_21_quaternary_diagnosis": "",
+    "box_24_primary_service_date": "09/03/25",
+    "box_24_primary_cpt_code": "85025",
+    "box_24_primary_charge": "117.00",
+    "box_25_provider_tax_id": "69-8663460",
+    "box_26_account_number": "3935-517-4162",
+    "box_28_total_charge": "611.00",
+    "box_33_billing_provider": "Dr. Lisa Price, MD",
+    "box_33_provider_npi": "8084011849",
+    "summary": {
+      "patient_name": "Brandy Wright Md",
+      "insurance_type": "Medicaid",
+      "total_diagnoses": 1,
+      "total_services": 2,
+      "total_amount": "611.00"
+    }
+  }
+}

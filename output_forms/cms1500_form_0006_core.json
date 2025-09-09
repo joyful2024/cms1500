@@ -1,0 +1,36 @@
+{
+  "form_number": 6,
+  "pdf_filename": "cms1500_form_0006.pdf",
+  "png_filename": "cms1500_form_0006.png",
+  "generated_date": "1970-06-21T04:07:17.567748",
+  "core_data": {
+    "box_1_insurance_type": "FECA BLK LUNG",
+    "box_1a_insured_id": "to34521780",
+    "box_2_patient_name": "Shari Combs",
+    "box_3_patient_dob": "03/22/54",
+    "box_3_patient_sex": "M",
+    "box_4_insured_name": "Shari Combs",
+    "box_5_patient_address": "0879 Rice Shoal, Smithfort, MN 79422",
+    "box_5_patient_phone": "(918) 721-2021",
+    "box_6_relationship": "O",
+    "box_21_primary_diagnosis": "I12.9",
+    "box_21_secondary_diagnosis": "R06.02",
+    "box_21_tertiary_diagnosis": "",
+    "box_21_quaternary_diagnosis": "",
+    "box_24_primary_service_date": "08/11/25",
+    "box_24_primary_cpt_code": "94010",
+    "box_24_primary_charge": "295.00",
+    "box_25_provider_tax_id": "79-3301368",
+    "box_26_account_number": "7537-907-2012",
+    "box_28_total_charge": "1415.00",
+    "box_33_billing_provider": "Dr. Melissa Norris, MD",
+    "box_33_provider_npi": "8084084895",
+    "summary": {
+      "patient_name": "Shari Combs",
+      "insurance_type": "FECA BLK LUNG",
+      "total_diagnoses": 2,
+      "total_services": 6,
+      "total_amount": "1415.00"
+    }
+  }
+}

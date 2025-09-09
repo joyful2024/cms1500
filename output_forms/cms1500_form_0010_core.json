@@ -1,0 +1,36 @@
+{
+  "form_number": 10,
+  "pdf_filename": "cms1500_form_0010.pdf",
+  "png_filename": "cms1500_form_0010.png",
+  "generated_date": "1995-11-03T09:32:33.138066",
+  "core_data": {
+    "box_1_insurance_type": "Medicare",
+    "box_1a_insured_id": "4gs621822r",
+    "box_2_patient_name": "Danielle Cline",
+    "box_3_patient_dob": "08/27/04",
+    "box_3_patient_sex": "F",
+    "box_4_insured_name": "Gloria Lee",
+    "box_5_patient_address": "824 White Ville Suite 488, Port Steven, RI 98248",
+    "box_5_patient_phone": "(001) 857-8462",
+    "box_6_relationship": "O",
+    "box_21_primary_diagnosis": "R06.02",
+    "box_21_secondary_diagnosis": "I25.10",
+    "box_21_tertiary_diagnosis": "",
+    "box_21_quaternary_diagnosis": "",
+    "box_24_primary_service_date": "09/05/25",
+    "box_24_primary_cpt_code": "99214",
+    "box_24_primary_charge": "468.00",
+    "box_25_provider_tax_id": "72-7880464",
+    "box_26_account_number": "1011-778-2406",
+    "box_28_total_charge": "1146.00",
+    "box_33_billing_provider": "Dr. John Herman, MD",
+    "box_33_provider_npi": "8084072486",
+    "summary": {
+      "patient_name": "Danielle Cline",
+      "insurance_type": "Medicare",
+      "total_diagnoses": 2,
+      "total_services": 3,
+      "total_amount": "1146.00"
+    }
+  }
+}

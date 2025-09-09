@@ -1,0 +1,36 @@
+{
+  "form_number": 2,
+  "pdf_filename": "cms1500_form_0002.pdf",
+  "png_filename": "cms1500_form_0002.png",
+  "generated_date": "2000-08-06T05:14:18.427033",
+  "core_data": {
+    "box_1_insurance_type": "FECA BLK LUNG",
+    "box_1a_insured_id": "pf54013936",
+    "box_2_patient_name": "William Dixon",
+    "box_3_patient_dob": "06/01/85",
+    "box_3_patient_sex": "F",
+    "box_4_insured_name": "William Dixon",
+    "box_5_patient_address": "3919 Brandon Prairie, Kristenborough, ME 92824",
+    "box_5_patient_phone": "(766) 738-1862",
+    "box_6_relationship": "O",
+    "box_21_primary_diagnosis": "Z51.11",
+    "box_21_secondary_diagnosis": "",
+    "box_21_tertiary_diagnosis": "",
+    "box_21_quaternary_diagnosis": "",
+    "box_24_primary_service_date": "08/23/25",
+    "box_24_primary_cpt_code": "90471",
+    "box_24_primary_charge": "226.00",
+    "box_25_provider_tax_id": "13-6424957",
+    "box_26_account_number": "0909-850-4137",
+    "box_28_total_charge": "1587.00",
+    "box_33_billing_provider": "Dr. Christy Johnson, MD",
+    "box_33_provider_npi": "8084078954",
+    "summary": {
+      "patient_name": "William Dixon",
+      "insurance_type": "FECA BLK LUNG",
+      "total_diagnoses": 1,
+      "total_services": 6,
+      "total_amount": "1587.00"
+    }
+  }
+}

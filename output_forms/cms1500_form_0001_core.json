@@ -1,0 +1,36 @@
+{
+  "form_number": 1,
+  "pdf_filename": "cms1500_form_0001.pdf",
+  "png_filename": "cms1500_form_0001.png",
+  "generated_date": "1984-01-14T18:05:38.363654",
+  "core_data": {
+    "box_1_insurance_type": "Tricare/Champus",
+    "box_1a_insured_id": "vC14511489",
+    "box_2_patient_name": "Justin Dalton",
+    "box_3_patient_dob": "10/31/69",
+    "box_3_patient_sex": "F",
+    "box_4_insured_name": "Justin Dalton",
+    "box_5_patient_address": "626 Price Shore Apt. 068, Danamouth, SC 20248",
+    "box_5_patient_phone": "(819) 468-0608",
+    "box_6_relationship": "O",
+    "box_21_primary_diagnosis": "J06.9",
+    "box_21_secondary_diagnosis": "",
+    "box_21_tertiary_diagnosis": "",
+    "box_21_quaternary_diagnosis": "",
+    "box_24_primary_service_date": "09/01/25",
+    "box_24_primary_cpt_code": "90471",
+    "box_24_primary_charge": "336.00",
+    "box_25_provider_tax_id": "98-9594768",
+    "box_26_account_number": "6377-113-4525",
+    "box_28_total_charge": "1412.00",
+    "box_33_billing_provider": "Dr. Daniel Valenzuela, MD",
+    "box_33_provider_npi": "8084059376",
+    "summary": {
+      "patient_name": "Justin Dalton",
+      "insurance_type": "Tricare/Champus",
+      "total_diagnoses": 1,
+      "total_services": 5,
+      "total_amount": "1412.00"
+    }
+  }
+}

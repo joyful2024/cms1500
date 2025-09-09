@@ -1,0 +1,36 @@
+{
+  "form_number": 5,
+  "pdf_filename": "cms1500_form_0005.pdf",
+  "png_filename": "cms1500_form_0005.png",
+  "generated_date": "2001-01-03T07:27:22.017051",
+  "core_data": {
+    "box_1_insurance_type": "FECA BLK LUNG",
+    "box_1a_insured_id": "KW60280895",
+    "box_2_patient_name": "Taylor Hill",
+    "box_3_patient_dob": "11/24/89",
+    "box_3_patient_sex": "M",
+    "box_4_insured_name": "Taylor Hill",
+    "box_5_patient_address": "186 Shawn Trafficway Apt. 140, Doylechester, NH 50636",
+    "box_5_patient_phone": "(391) 349-0450",
+    "box_6_relationship": "S",
+    "box_21_primary_diagnosis": "R50.9",
+    "box_21_secondary_diagnosis": "M79.3",
+    "box_21_tertiary_diagnosis": "J44.1",
+    "box_21_quaternary_diagnosis": "R51",
+    "box_24_primary_service_date": "08/09/25",
+    "box_24_primary_cpt_code": "71020",
+    "box_24_primary_charge": "58.00",
+    "box_25_provider_tax_id": "18-0413054",
+    "box_26_account_number": "8208-403-4412",
+    "box_28_total_charge": "58.00",
+    "box_33_billing_provider": "Dr. Carl Brown, MD",
+    "box_33_provider_npi": "8084036218",
+    "summary": {
+      "patient_name": "Taylor Hill",
+      "insurance_type": "FECA BLK LUNG",
+      "total_diagnoses": 6,
+      "total_services": 1,
+      "total_amount": "58.00"
+    }
+  }
+}

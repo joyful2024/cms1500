@@ -1,0 +1,36 @@
+{
+  "form_number": 3,
+  "pdf_filename": "cms1500_form_0003.pdf",
+  "png_filename": "cms1500_form_0003.png",
+  "generated_date": "2024-05-17T09:15:56.148410",
+  "core_data": {
+    "box_1_insurance_type": "Other",
+    "box_1a_insured_id": "Kw28926818",
+    "box_2_patient_name": "Bethany Galvan",
+    "box_3_patient_dob": "05/21/83",
+    "box_3_patient_sex": "F",
+    "box_4_insured_name": "Joe Lowe",
+    "box_5_patient_address": "1005 Haley Highway Apt. 184, Robinsonland, OR 59335",
+    "box_5_patient_phone": "(354) 412-6672",
+    "box_6_relationship": "M",
+    "box_21_primary_diagnosis": "B34.9",
+    "box_21_secondary_diagnosis": "M25.511",
+    "box_21_tertiary_diagnosis": "",
+    "box_21_quaternary_diagnosis": "",
+    "box_24_primary_service_date": "08/27/25",
+    "box_24_primary_cpt_code": "99213",
+    "box_24_primary_charge": "145.00",
+    "box_25_provider_tax_id": "51-9454907",
+    "box_26_account_number": "8744-064-6887",
+    "box_28_total_charge": "398.00",
+    "box_33_billing_provider": "Dr. Ronald Boyd, MD",
+    "box_33_provider_npi": "8084083442",
+    "summary": {
+      "patient_name": "Bethany Galvan",
+      "insurance_type": "Other",
+      "total_diagnoses": 2,
+      "total_services": 3,
+      "total_amount": "398.00"
+    }
+  }
+}
