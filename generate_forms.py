@@ -160,7 +160,7 @@ def generate_random_address():
     insurance_types = [
         "Medicare",
         "Medicaid", 
-        "Tricare/Champus",
+        "Tricare",
         "Champva",
         "Group Health Plan",
         "FECA BLK LUNG",
@@ -175,7 +175,7 @@ def generate_random_address():
     # Validate: never allow both M and F to be selected simultaneously
     
     # Generate random relationship to insured (Field 6)
-    relationship_options = ["S", "M", "C", "O"]  # S=Self, M=Spouse, C=Child, O=Other
+    relationship_options = ["Self", "Spouse", "Child", "Other"]  # S=Self, M=Spouse, C=Child, O=Other
     selected_relationship = fake.random_element(relationship_options)
     
     # Generate random employment related (Field 10a)
@@ -675,7 +675,7 @@ def generate_random_address():
         medicaid_resub = ""
     
     # Referring physician (Box 17) with valid NPI
-    if fake.random_int(1, 100) <= 40:  # 40% chance of referral
+    if fake.random_int(1, 100) <= 100:  # 100% chance of referral for testing
         ref_physician = f"Dr. {fake.first_name()} {fake.last_name()}, MD"
         ref_physician_npi = generate_valid_npi()  # Valid NPI with check digit
         ref_physician_qualifier = "1B"  # NPI qualifier
@@ -954,8 +954,8 @@ def generate_random_address():
         
         # Box 17: Name of Referring Provider
         "box_17_referring_provider_name": ref_physician,
-        "box_17a_referring_provider_npi": ref_physician_npi,
-        "box_17b_referring_provider_qualifier": ref_physician_qualifier,
+        "box_17a_referring_provider_qualifier": ref_physician_qualifier,
+        "box_17b_referring_provider_npi": ref_physician_npi,
         
         # Box 18: Hospitalization Dates Related to Current Services
         "box_18_hospitalization_from_month": hosp_mm_from,
@@ -1014,10 +1014,10 @@ def generate_random_address():
         # Additional insurance details
         "insurance_company_name": insurance_company_name,
         "insurance_company_address": insurance_company_address,
-        "insurance_id": insurance_id,
+        "insurance_id": insurance_policy_id,
         "insurance_address2": insurance_address2,
         "insurance_city_state_zip": insurance_city_state_zip,
-        "pin": pin,
+        "pin": provider_npi,
         "pin1": pin1,
         "grp1": grp1,
         "doc_location": doc_location,
@@ -1055,6 +1055,7 @@ def generate_random_address():
         "pt_account": patient_account_number,
         "ins_name": insured_name,
         "ins_policy": insurance_policy_id,
+        "grp": grp,
         "doc_name": provider_name,
         "doc_street": provider_address,
         "doc_phone": provider_phone_formatted,
@@ -1090,8 +1091,8 @@ def generate_random_address():
         "original_ref": original_ref,
         "medicaid_resub": medicaid_resub,
         "ref_physician": ref_physician,
-        "physician number 17a": ref_physician_npi,
-        "physician number 17a1": ref_physician_qualifier,
+        "physician number 17a": ref_physician_qualifier,
+        "physician number 17a1": ref_physician_npi,
         "pt_signature": pt_signature,
         "pt_date": pt_signature_date,
         "physician_signature": physician_signature,
@@ -1195,7 +1196,7 @@ def fill_cms1500_form(address_data, output_filename):
         
         # Other checkbox fields with proper mappings (using actual export values from PDF analysis)
         checkbox_field_mappings = {
-            'rel_to_ins': {'S': '/S', 'M': '/M', 'C': '/C', 'O': '/O'},
+            'rel_to_ins': {'Self': '/S', 'Spouse': '/M', 'Child': '/C', 'Other': '/O'},
             'employment': {'YES': '/YES', 'NO': '/NO'},
             'pt_auto_accident': {'YES': '/YES', 'NO': '/NO'},
             'other_accident': {'YES': '/YES', 'NO': '/NO'},
@@ -1315,8 +1316,23 @@ def create_core_subset_data(form_data):
         "box_5_patient_address": f"{form_data.get('box_5_patient_street', '')}, {form_data.get('box_5_patient_city', '')}, {form_data.get('box_5_patient_state', '')} {form_data.get('box_5_patient_zip', '')}",
         "box_5_patient_phone": f"({form_data.get('box_5_patient_area_code', '')}) {form_data.get('box_5_patient_phone', '')}",
         
+        # Box 5: Patient's Address (individual components)
+        "box_5_patient_street": form_data.get('box_5_patient_street', ''),
+        "box_5_patient_city": form_data.get('box_5_patient_city', ''),
+        "box_5_patient_state": form_data.get('box_5_patient_state', ''),
+        "box_5_patient_zip": form_data.get('box_5_patient_zip', ''),
+        "box_5_patient_area_code": form_data.get('box_5_patient_area_code', ''),
+        
         # Box 6: Patient Relationship to Insured
         "box_6_relationship": form_data.get("box_6_patient_relationship_to_insured", ""),
+        
+        # Box 7: Insured's Address (individual components)
+        "box_7_insured_street": form_data.get('box_7_insured_street', ''),
+        "box_7_insured_city": form_data.get('box_7_insured_city', ''),
+        "box_7_insured_state": form_data.get('box_7_insured_state', ''),
+        "box_7_insured_zip": form_data.get('box_7_insured_zip', ''),
+        "box_7_insured_phone_area": form_data.get('box_7_insured_phone_area', ''),
+        "box_7_insured_phone": form_data.get('box_7_insured_phone', ''),
         
         # Box 21: Primary Diagnosis (first 4 only for core subset)
         "box_21_primary_diagnosis": form_data.get("box_21_diagnosis_1_code", ""),
@@ -1338,9 +1354,10 @@ def create_core_subset_data(form_data):
         # Box 28: Total Charge
         "box_28_total_charge": form_data.get("box_28_total_charge", ""),
         
+        
         # Box 33: Billing Provider
         "box_33_billing_provider": form_data.get("box_33_billing_provider_name", ""),
-        "box_33_provider_npi": form_data.get("box_33a_billing_provider_npi", ""),
+        "box_33a_provider_npi": form_data.get("box_33a_billing_provider_npi", ""),
         
         # Summary fields for quick reference
         "summary": {
@@ -1424,8 +1441,8 @@ def generate_multiple_forms(n):
             patient_birth = f"{address_data['birth_mm']}/{address_data['birth_dd']}/{address_data['birth_yy']}"
             insurance_type = address_data['insurance_type_name']
             patient_sex = "Male" if address_data['sex'] == 'M' else "Female"
-            relationship = {"S": "Self", "M": "Spouse", "C": "Child", "O": "Other"}.get(address_data['rel_to_ins'], address_data['rel_to_ins'])
-            
+            relationship = {"Self": "Self", "Spouse": "Spouse", "Child": "Child", "Other": "Other"}.get(address_data['rel_to_ins'], address_data['rel_to_ins'])
+
             # Show primary diagnosis codes
             num_diagnoses = address_data['num_diagnoses']
             diagnosis_codes = []
