@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+# Generated output files
+output_forms/
+
 # macOS
 .DS_Store
 .DS_Store?
